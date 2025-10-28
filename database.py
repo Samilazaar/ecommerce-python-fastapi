@@ -6,6 +6,11 @@ import os
 # Configuration de la base de données
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./ecommerce.db")
 
+# Pour Vercel, utiliser PostgreSQL obligatoirement
+if os.getenv("VERCEL"):
+    if not DATABASE_URL or DATABASE_URL.startswith("sqlite"):
+        raise ValueError("Vercel nécessite une base de données PostgreSQL. Configurez DATABASE_URL avec une URL PostgreSQL.")
+
 # Pour SQLite (développement)
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
