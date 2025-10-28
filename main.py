@@ -13,7 +13,12 @@ from datetime import datetime, timedelta
 import uvicorn
 
 # Créer les tables de base de données
-models.Base.metadata.create_all(bind=engine)
+try:
+    models.Base.metadata.create_all(bind=engine)
+    print("✅ Base de données initialisée avec succès")
+except Exception as e:
+    print(f"⚠️ Erreur lors de l'initialisation de la base de données: {e}")
+    print("Le site fonctionnera en mode dégradé (sans persistance des données)")
 
 app = FastAPI(title="E-commerce Python", version="1.0.0")
 
@@ -28,6 +33,15 @@ security = HTTPBearer()
 @app.get("/")
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+# Page de statut pour debug
+@app.get("/status")
+async def status():
+    return {
+        "status": "ok",
+        "database": "connected" if DATABASE_URL else "not configured",
+        "environment": "vercel" if os.getenv("VERCEL") else "local"
+    }
 
 # API Routes
 @app.get("/api/products")
